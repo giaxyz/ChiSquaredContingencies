@@ -181,8 +181,7 @@ class DataReadWrite:
             
                 #print(row[columnIndex])
                 columnList.append(row[columnIndex]) 
-                
-             
+                          
          
         finally:
         
@@ -248,5 +247,3 @@ class DataReadWrite:
         return columnAsFloat
             
         
-        
-               
