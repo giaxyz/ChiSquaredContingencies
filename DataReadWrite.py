@@ -236,5 +236,16 @@ class DataReadWrite:
 
         return averagesByRow
 
+    def getColumnValuesAsFloat(self, columnIndex):
+
+        column = self.getColumnValues(columnIndex)
+        columnAsFloat = []
+
+        for i in range(0, len(column)):
+            value = float(column[i])
+            columnAsFloat.append(value)
+
+        return columnAsFloat
+
 
 

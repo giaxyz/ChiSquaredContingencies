@@ -1,5 +1,5 @@
 import DataReadWrite
-import StatsHandler
+import StatsHandler as sh
 
 import csv
 
@@ -23,7 +23,6 @@ def writeCSV(newCsvName, data):
 
             a = csv.writer(fp, delimiter=',')
             a.writerows(data)
-
 
 def fillMissingValues(csv_data, csvMetaData, varTypesIndex):
 
@@ -84,19 +83,41 @@ def fillMissingValues(csv_data, csvMetaData, varTypesIndex):
 if __name__ == "__main__":
 
     main()
-    #csv_data = "worldData.csv"
-    #dataHandler = DataReadWrite.DataReadWrite(csv_data)
-    #dataHandler.printCSV()
-
-
 
     ## First clean up the missing attributes by filling in all the floats and int attributes with the average
     ##     If the value is a string, put "not_applicable"
     cleanedData = fillMissingValues("worldData.csv", "worldDataMetaData.csv", 5)
     cleanedDataName = "worldDataFilled.csv"
     writeCSV(cleanedDataName,cleanedData)
-    #dataHandler = DataReadWrite.DataReadWrite(cleanedDataName)
-    #dataHandler.printCSV()
+    dataHandler = DataReadWrite.DataReadWrite(cleanedDataName)
+
+
+    index = 15
+    currentColumn = dataHandler.getColumnValuesAsFloat(index)
+    #dataHandler.printColumn(index)
+
+    #currentColumn = [1,2,3,4,2,2,2,25,5,5,5,8,8,8,8,100]
+    #currentColumn = [5,5,5,5,5,5,5,5,5,5]
+    currentColumn =[8,8,2,2,2,2,2,2,2,2]
+    #currentColumn = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+
+    skewThreshold = 1.5
+    isSkewed = sh.computeSkewRatio (currentColumn, skewThreshold)
+    print("Data skew : " )
+    print(isSkewed)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
