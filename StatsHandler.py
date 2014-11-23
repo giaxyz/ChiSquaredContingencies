@@ -3,6 +3,8 @@ Created on 22 Nov 2014
 
 @author: Gia
 '''
+import DataReadWrite
+
 from _overlapped import NULL
 
 def computeAverage(listOfValues):
@@ -331,21 +333,149 @@ def getSmaller(value1, value2):
     else:
         return value2
 
-def discretize(currentColumn, isSkewed): 
+def discretize(currentColumn, isSkewed, n, columnIndex, attrName, metaDataHandler): 
     
     #currentColumn = [1,2,3,4,2,2,2,25,5,5,5,8,8,8,8,100]
     #currentColumn = [5,5,5,5,5,5,5,5,5,5]
     #currentColumn = [8,8,2,2,2,2,2,2,2,2]
     #currentColumn = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     
-    if(isSkewed):
+    '''
+    Perform binning discretization - if skewed data, perform equal width.  If not skewed, perform equal depth partitioning 
+    Input : column of values
+        isSkewed : boolean True or False to indicate if the data is skewed or not
+        n : the number of discretization intervals to perform binning
         
-        print("Skewed")
+    Output : the new list of discretized values
+    
+    '''
+     
+    discretizedList = []
+    discreetLabels = getDiscreetLabelsFromMetadata(metaDataHandler, n, columnIndex)
+    
+    if(isSkewed):
+        partitions = equalWidthPartition(currentColumn, n, columnIndex)
+        
+    else:
+        partitions = equalDepthPartition(currentColumn, n, columnIndex)
+    
+    print(attrName)
+    print(currentColumn)  
+    print(partitions)
+    print (discreetLabels)
+      
+    return discretizedList
+
+def equalWidthPartition(listOfValues, n, columnIndex):
+    
+    '''
+    
+    Create a list of partition values (of number n ) to divides the range in the list of values into n intervals of equal size
+    Widths = (highest - lowest)/n
+    Input : the list of values, n : number of partitions, columnIndex for which column of values
+    Return : a list of n values for partitioning
+    
+    '''
+    binValues = []
+    sortedValues = sorted(listOfValues)
+    highest = sortedValues[len(sortedValues) - 1]
+    lowest = sortedValues[0]
+    widths = ((highest - lowest) / n)
+    
+    #print("Discretizing Equal Width: " + "Column Index : " + str(columnIndex))
+    #print(listOfValues)
+   
+    
+    upperBound = lowest + widths
+    
+    for i in range (0, n):
+        #print ("Bin : " + str(i) + " " + str(upperBound))
+        binValues.append(upperBound)
+        upperBound = upperBound + widths
+    
+    #print("Final Bin Values : ")
+    #print(binValues)
+    return binValues
+
+def equalDepthPartition(listOfValues, n, columnIndex):
+    
+    '''
+    Return a list of partition values for n bins
+    to later divide the range into N intervals, each containing approximately same
+        number of samples
+        
+    Input : the list of values, n : number of partitions, columnIndex for which column of values
+    Return : a list of n values for partitioning
+    
+    '''
+    
+    binValues = []
+    sortedValues = sorted(listOfValues)
+    #print("Discretizing Equal Depth: " + "  Column Index : " + str(columnIndex))
+    #print(listOfValues)
+    binListSize = round(len(listOfValues) / n)
+    currentBin = binListSize - 1
+    #print("ListSize  is  " + str(binListSize))
+    
+    for i in range(0, n):
+        
+        if(i < (n-1)):
+           
+            #print("Bin : " + str(i) + " " + str(sortedValues[currentBin]))
+            binValues.append(sortedValues[currentBin])
+            currentBin = currentBin + binListSize
+        
+        else:
+            
+            #print("Bin : " + str(i) + " " + str(sortedValues[len(listOfValues) - 1]))
+            binValues.append(sortedValues[len(listOfValues) - 1])
+  
+    #print("Final Bin Values : ")
+    #print(binValues)
+    return binValues
+
+def getDiscreetLabelsFromMetadata(metaDataHandler, n, columnIndex): 
+    
+    """
+    Output the discreet labels used for discretization of the current column attribute
+    Input: the metadataHandler class with the metadata.csv, where columns 8,9,10 and 11 have discretization labels 
+        column index : the index of the column to discretize
+        n : the number of discretization binds
+    Return : a list of discretization labels
+    
+    """
+    
+    #These inputs are hardcoded into the metadata file, refer to the "worldDataMetaData.csv"
+    descriptors = metaDataHandler.getColumn(8)
+    levelHighDescriptors = metaDataHandler.getColumn(9)
+    levelMediumDescriptors = metaDataHandler.getColumn(10)
+    levelLowDescriptors = metaDataHandler.getColumn(11)
+  
+    
+    descriptor = descriptors[columnIndex + 1]
+    levelHighDescriptor = ((levelHighDescriptors[columnIndex + 1]) + " " + descriptor) 
+    levelMediumDescriptor = ((levelMediumDescriptors[columnIndex + 1]) + " " + descriptor) 
+    levelLowDescriptor = ((levelLowDescriptors[columnIndex + 1]) + " " + descriptor)
+    
+    
+    discreetLabels = []
+    
+    if(n == 3):
+
+        discreetLabels.append(levelHighDescriptor)
+        discreetLabels.append(levelMediumDescriptor)
+        discreetLabels.append(levelLowDescriptor)
+            
+    elif(n == 2):
+       
+        discreetLabels.append(levelHighDescriptor)
+        discreetLabels.append(levelLowDescriptor) 
         
     else:
         
-        print("Not Skewed")
+        raise ValueError ("Oops - n has to be either 2 or 3 in this case")
         
-  
-           
+
+    return discreetLabels
     
+     

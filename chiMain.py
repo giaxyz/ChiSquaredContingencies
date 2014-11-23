@@ -43,8 +43,7 @@ def getVariableType(columnIndex, varTypesIndex):
     
 
     return variableType
-    
-    
+       
 def writeCSV(newCsvName, data):
         
         '''
@@ -129,8 +128,10 @@ if __name__ == "__main__":
     
     cleanedData = fillMissingValues("worldData.csv", "worldDataMetaData.csv", varTypesIndex)
     cleanedDataName = "worldDataFilled.csv"
+    metaDataName = "worldDataMetaData.csv"
     writeCSV(cleanedDataName,cleanedData)
     dataHandler = DataReadWrite.DataReadWrite(cleanedDataName)
+    metaDataHandler = DataReadWrite.DataReadWrite(metaDataName)
     
     
     ## ------ Discretize all float and integer attributes in the data values
@@ -138,34 +139,27 @@ if __name__ == "__main__":
     finalData = []
     isTesting = True
     skewThreshold = 1.5
+    numberOfPartitions = 3 ## number of parititions here can only be 2 or 3
     numColumns = len(dataHandler.getRow(0))
-   
+    start = 0
     
-    for i in range(0, numColumns):
-        
-        if(isTesting):
-            
-            i = 3 # not skewed
-            #i = 4 # skewed
+    if(isTesting):
+        start = 3
+        numColumns = 5
+    
+    for i in range(start, numColumns):
         
         currentColumn = dataHandler.getColumnValues(i)
         currentAttrName = getVariableName(i)
         currentAttributeType = getVariableType(i, varTypesIndex)
         
         if(currentAttributeType != "string"):
-            
-            
-            ## Print column, attribute name and type
-            print("\n" + currentAttributeType + "  : " + currentAttrName)
-            print(currentColumn)
-            print("\n")
+                        
             currentColumn = dataHandler.getColumnValuesAsFloat(i)
             isSkewed = sh.computeSkewRatio (currentColumn, skewThreshold)
-            sh.discretize(currentColumn, isSkewed)
+            sh.discretize(currentColumn, isSkewed, numberOfPartitions, i, currentAttrName, metaDataHandler)
             
-            if(isTesting):
-                break
-     
+           
     ## write out the final discretized data read for chi squared
  
     
