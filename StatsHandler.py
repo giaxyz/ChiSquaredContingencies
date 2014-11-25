@@ -350,7 +350,7 @@ def discretize(currentColumn, isSkewed, n, columnIndex, attrName, metaDataHandle
     
     '''
      
-    discretizedList = []
+    
     discreetLabels = getDiscreetLabelsFromMetadata(metaDataHandler, n, columnIndex)
     
     if(isSkewed):
@@ -359,12 +359,11 @@ def discretize(currentColumn, isSkewed, n, columnIndex, attrName, metaDataHandle
     else:
         partitions = equalDepthPartition(currentColumn, n, columnIndex)
     
-    print(attrName)
-    print(currentColumn)  
-    print(partitions)
-    print (discreetLabels)
+    
+    row = discretizeColumn(attrName, currentColumn, partitions, discreetLabels)
+    
       
-    return discretizedList
+    return row
 
 def equalWidthPartition(listOfValues, n, columnIndex):
     
@@ -462,14 +461,17 @@ def getDiscreetLabelsFromMetadata(metaDataHandler, n, columnIndex):
     
     if(n == 3):
 
-        discreetLabels.append(levelHighDescriptor)
-        discreetLabels.append(levelMediumDescriptor)
         discreetLabels.append(levelLowDescriptor)
+        discreetLabels.append(levelMediumDescriptor)
+        discreetLabels.append(levelHighDescriptor)
+        
+        
             
     elif(n == 2):
        
+        discreetLabels.append(levelLowDescriptor)
         discreetLabels.append(levelHighDescriptor)
-        discreetLabels.append(levelLowDescriptor) 
+         
         
     else:
         
@@ -477,5 +479,38 @@ def getDiscreetLabelsFromMetadata(metaDataHandler, n, columnIndex):
         
 
     return discreetLabels
+
+def discretizeColumn(attributeName, listOfValues, partitions, discreetLabels): 
+    
+    column = [attributeName]
+   
+  
+    for i in range(0, len(listOfValues)):
+        
+        column.append(discreetLabels[0])
+        
+    for i in range(0, (len(partitions))-1):
+        
+        
+        discreetLabelsIndex = i + 1
+        nextLabel = discreetLabels[discreetLabelsIndex]
+        nextPartition = partitions[i]
+       
+        
+        for j in range(0, len(listOfValues)):
+            
+            currentValue = listOfValues[j]
+            
+            if(currentValue > nextPartition):
+                
+              
+                column[j + 1] = nextLabel
+                
+                
+       
+    return column
+    
+    
+    
     
      

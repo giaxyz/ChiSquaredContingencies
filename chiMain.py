@@ -1,13 +1,10 @@
 import DataReadWrite
 import StatsHandler as sh
-
 import csv
+import DoChiSquare
+
 from _overlapped import NULL
 
-def main():
-    
-    print("")
-    
 def getVariableName(columnIndex):      
     
     '''
@@ -115,11 +112,28 @@ def fillMissingValues(csv_data, csvMetaData, varTypesIndex):
    
     #testRow = dataHandler.getRow(5)
 
+def convertToRows(listOfColumns):
+    
+    data = []
+  
+    numColumns = len(listOfColumns)
+    numRows = len(listOfColumns[0])
+    
+    for i in range(0, numRows):
+        
+        row = []
+        
+        for j in range(0, numColumns):
+            
+            row.append(listOfColumns[j][i])
+        
+        data.append(row)
+        
+   
+    return data
+
 if __name__ == "__main__":
-    
-    main()
-    
-    
+       
     varTypesIndex = 5 #The column of the metadata.csv which lists each variable's type
     
     ## ------ Fill missing attributes by filling in all the floats and int attributes with the average
@@ -137,7 +151,7 @@ if __name__ == "__main__":
     ## ------ Discretize all float and integer attributes in the data values
     
     finalData = []
-    isTesting = True
+    isTesting = False
     skewThreshold = 1.5
     numberOfPartitions = 3 ## number of parititions here can only be 2 or 3
     numColumns = len(dataHandler.getRow(0))
@@ -146,6 +160,8 @@ if __name__ == "__main__":
     if(isTesting):
         start = 3
         numColumns = 5
+    
+    discretizedColumns = []
     
     for i in range(start, numColumns):
         
@@ -157,10 +173,38 @@ if __name__ == "__main__":
                         
             currentColumn = dataHandler.getColumnValuesAsFloat(i)
             isSkewed = sh.computeSkewRatio (currentColumn, skewThreshold)
-            sh.discretize(currentColumn, isSkewed, numberOfPartitions, i, currentAttrName, metaDataHandler)
+            discretizedColumn = sh.discretize(currentColumn, isSkewed, numberOfPartitions, i, currentAttrName, metaDataHandler)
+            discretizedColumns.append(discretizedColumn)
+        
+        else:
             
-           
-    ## write out the final discretized data read for chi squared
+            currentColumn = dataHandler.getColumn(i)
+            discretizedColumns.append(currentColumn)
+   
+    
+    ## ---------- Convert Discretized columns to rows and write out the data 
+    
+    discretizedData = convertToRows(discretizedColumns)
+    
+    discretizedDataName = "worldDataDiscretized.csv"
+    
+    writeCSV(discretizedDataName, discretizedData)
+    
+
+    ## -------- Perform Chi Square
+    
+    dataHandlerDiscreet = DataReadWrite.DataReadWrite(discretizedDataName)
+    #dataHandlerDiscreet.printCSV()
+    
+    testData = "herbs.csv"
+    #testData = "worldDataDiscretized.csv"
+    chiSquareHandler = DoChiSquare.DoChiSquare(testData)
+    attr1 = 0 ## never put 0 in each of these when you're doing the world data
+    attr2 = 1
+    chiSquareHandler.run(attr1, attr2)
+    
+     
+    
  
     
     

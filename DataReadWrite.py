@@ -79,7 +79,7 @@ class DataReadWrite:
      
         finally:
              
-            return count  
+            return count - 1 # minus 1 for the row with the attribute names  
             f.close()
   
     def printRow(self, rowIndex):
@@ -181,7 +181,8 @@ class DataReadWrite:
             
                 #print(row[columnIndex])
                 columnList.append(row[columnIndex]) 
-                          
+                
+             
          
         finally:
         
@@ -247,3 +248,5 @@ class DataReadWrite:
         return columnAsFloat
             
         
+        
+               
