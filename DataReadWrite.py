@@ -238,6 +238,14 @@ class DataReadWrite:
                       
     def getColumnValuesAsFloat(self, columnIndex):
         
+        '''
+        Return the column values as a floating point variable, eg if it is a string or any other data type
+        
+        Input : index of the column
+        Return : list of column values parsed as floating point variables
+        
+        
+        '''
         column = self.getColumnValues(columnIndex)
         columnAsFloat = []
         

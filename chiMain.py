@@ -134,15 +134,17 @@ def convertToRows(listOfColumns):
 
 if __name__ == "__main__":
        
-    varTypesIndex = 5 #The column of the metadata.csv which lists each variable's type
+    # DO NOT TOUCH
+    varTypesIndex = 5 #The column of the metadata.csv which lists each variable's type 
+    cleanedDataName = "worldDataFilled.csv"
+    discretizedDataName = "worldDataDiscretized.csv"
+    metaDataName = "worldDataMetaData.csv"
     
     ## ------ Fill missing attributes by filling in all the floats and int attributes with the average
     ##     If the value is a string, put "not_applicable"
     
     
     cleanedData = fillMissingValues("worldData.csv", "worldDataMetaData.csv", varTypesIndex)
-    cleanedDataName = "worldDataFilled.csv"
-    metaDataName = "worldDataMetaData.csv"
     writeCSV(cleanedDataName,cleanedData)
     dataHandler = DataReadWrite.DataReadWrite(cleanedDataName)
     metaDataHandler = DataReadWrite.DataReadWrite(metaDataName)
@@ -151,13 +153,13 @@ if __name__ == "__main__":
     ## ------ Discretize all float and integer attributes in the data values
     
     finalData = []
-    isTesting = False
+    isTesting = False ## Set this to discretize test columns only. See below, if(isTesting) 
     skewThreshold = 1.5
     numberOfPartitions = 3 ## number of parititions here can only be 2 or 3
     numColumns = len(dataHandler.getRow(0))
     start = 0
     
-    if(isTesting):
+    if(isTesting): ## if testing, set these to the test columns
         start = 3
         numColumns = 5
     
@@ -185,25 +187,69 @@ if __name__ == "__main__":
     ## ---------- Convert Discretized columns to rows and write out the data 
     
     discretizedData = convertToRows(discretizedColumns)
-    
-    discretizedDataName = "worldDataDiscretized.csv"
-    
     writeCSV(discretizedDataName, discretizedData)
-    
-
-    ## -------- Perform Chi Square
-    
     dataHandlerDiscreet = DataReadWrite.DataReadWrite(discretizedDataName)
     #dataHandlerDiscreet.printCSV()
+
+    ## --------------  Perform Chi Square Test  and output p-Values --------------------
     
-    testData = "herbs.csv"
-    #testData = "worldDataDiscretized.csv"
-    chiSquareHandler = DoChiSquare.DoChiSquare(testData)
-    attr1 = 0 ## never put 0 in each of these when you're doing the world data
-    attr2 = 1
-    chiSquareHandler.run(attr1, attr2)
+    # ----- Leave this code in for testing purposes only, but ignore
+    #finalData = "herbs.csv"
+    #chiSquareHandler = DoChiSquare.DoChiSquare(finalData)
     
-     
+    ## Set the input and output attributes, where attr1 is the input attribute, attr 2 is the output attribute
+    #attr1 = 1 ## never put 0 in each of these when you're doing the world data
+    #attr2 = 0
+    #printConclusion = False
+    #chiValueRank = chiSquareHandler.run(attr1, attr2, printConclusion)
+    #print(chiValueRank)
+    
+    #  ----- Perform chi square specific to the worldData.csv provided
+  
+    ## List of attributes in the world.csv file which will be the input attributes.
+    # where 27 and 28 are discreet attributes, the rest are floats
+    worldDataAttributes = [1,2,3,4,5,6,7,8,9,11,12,14,15,16,17,18,20,21,22,25,26,27,28] 
+    outputAttribute = 10 ## set to sugar
+    outputAttrName = getVariableName(outputAttribute)
+    printConclusion = True
+    finalData = discretizedDataName
+    chiSquareHandler = DoChiSquare.DoChiSquare(finalData)
+    
+    rankedNames = []
+    rankedPValues = []
+    
+    # For every input attribute, caclulate the p-value
+    for i in range(0, len(worldDataAttributes)):
+        
+        if(i != outputAttribute):
+            name = getVariableName(worldDataAttributes[i])
+            rankedNames.append(name)
+            #name = getVariableName(26)
+            attr1 = worldDataAttributes[i]
+            attr2 = outputAttribute
+            #print("Attribute index : " + str(attr1) + " Name : " + name + " Output Attr : " + outputAttrName)
+            chiValueRank = chiSquareHandler.run(attr1, attr2, printConclusion)
+            rankedPValues.append(chiValueRank)
+            
+    sortedRanks = sorted(rankedPValues)
+    
+    ## Sort each p-Value according to how highly they are ranked 
+    
+    j = len(sortedRanks) - 1
+    for i in range(0, len(sortedRanks)):
+        
+        currentPValue = sortedRanks[j]
+       
+        
+        
+        for k in range(0, len(rankedPValues)):
+            
+            if(rankedPValues[k] == sortedRanks[j]):
+                
+                print("Attribute : " + str(rankedNames[k]) + "  Chi P-Value Rank : " + str(rankedPValues[k]))
+        
+        j = j - 1
+  
     
  
     

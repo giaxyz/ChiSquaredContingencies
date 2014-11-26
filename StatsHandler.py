@@ -321,12 +321,26 @@ def computeSkewRatio(listOfValues, threshold):
 
 def getLarger(value1, value2):
     
+    """
+    Output the larger of two values
+    Input : value1, value2  as float or ints
+    Return : the greater value
+    
+    """
     if(value1 >= value2):
         return value1
     else:
         return value2
 
 def getSmaller(value1, value2):
+    
+    
+    """
+    Output the smaller of two values
+    Input : value1, value2  as float or ints
+    Return : the smaller value
+    
+    """
     
     if(value1 <= value2):
         return value1
@@ -335,11 +349,7 @@ def getSmaller(value1, value2):
 
 def discretize(currentColumn, isSkewed, n, columnIndex, attrName, metaDataHandler): 
     
-    #currentColumn = [1,2,3,4,2,2,2,25,5,5,5,8,8,8,8,100]
-    #currentColumn = [5,5,5,5,5,5,5,5,5,5]
-    #currentColumn = [8,8,2,2,2,2,2,2,2,2]
-    #currentColumn = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-    
+   
     '''
     Perform binning discretization - if skewed data, perform equal width.  If not skewed, perform equal depth partitioning 
     Input : column of values
@@ -482,6 +492,19 @@ def getDiscreetLabelsFromMetadata(metaDataHandler, n, columnIndex):
 
 def discretizeColumn(attributeName, listOfValues, partitions, discreetLabels): 
     
+    
+    """
+    Perform discretiztion on a given column of data.  
+    Input: 
+        attributeName : the name of the attribute to add to the top of the column
+        listOfValues : the discretization margins
+        partitions : the number of partitions
+        discreetLabels : the labels used to discretize within the listOfValues ie. partition values
+    
+    Return : the discretized column as a list, with the variable attribute name on the top
+    
+    """
+    
     column = [attributeName]
    
   
@@ -506,8 +529,6 @@ def discretizeColumn(attributeName, listOfValues, partitions, discreetLabels):
               
                 column[j + 1] = nextLabel
                 
-                
-       
     return column
     
     
